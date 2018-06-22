@@ -1,21 +1,33 @@
-interface IOptions {
+interface IOptions extends IRunningOptions{
+
+}
+interface IRunningOptions {
   success?: string
   failure?: string
+  promise?: boolean
 }
 
 const kegResolve = (options: IOptions = {}) => () => {
   const {success = 'Success', failure = 'Failure'} = options
   return (context: any) => {
-    return (resolve: Promise<any>): Promise<any> => {
-      return new Promise((outResolve, outReject) => {
+    return (resolve: Promise<any>, runOptions: IRunningOptions = {}): Promise<any> => {
+      const run = (outResolve?: any, outReject?: any) => {
         resolve.then((result) => {
           context.commit(`${context.name}${success}`, result)
-          outResolve(result)
+          if(outResolve){
+            outResolve(result)
+          }
         }).catch((error) => {
           context.commit(`${context.name}${failure}`, error)
-          outReject(error)
+          if(outReject){
+            outReject(error)
+          }
         })
-      })
+      }
+      if(runOptions.promise || options.promise){
+        return new Promise(run)
+      }
+      run()
 
     }
   }

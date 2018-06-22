@@ -24,13 +24,14 @@ describe('vuex-keg-resolve', () => {
     },
     mutations:{
       testSuccess(state, payload) {
+        console.log('workign!')
         state.test = payload
-      }
+      },
     },
     plugins: [
       vuexKeg({
         plugins: {
-          resolve: vuexResolve()
+          resolve: vuexResolve({promise: true})
         }
       })
     ]

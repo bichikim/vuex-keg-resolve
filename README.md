@@ -1,3 +1,2 @@
-# My typescript
-
-> A quick way to start typescript 
+# Vuex-keg-resolve
+> a keg to resolve Promise
