@@ -1,5 +1,6 @@
 const WebpackBaseConfig = require('./webpack.base.config')
 const webpackMerge = require('webpack-merge')
+const Webpack = require('webpack')
 //  karma test won't ues entry
 WebpackBaseConfig.entry = null
 module.exports = webpackMerge(WebpackBaseConfig, {
@@ -18,11 +19,16 @@ module.exports = webpackMerge(WebpackBaseConfig, {
         use: {
           // for karma coverage
           loader: 'istanbul-instrumenter-loader',
-          options: {esModules: true}
+          options: {esModules: true},
         },
         enforce: 'post',
         exclude: /node_modules|\.spec\.js$/,
-      }
-    ]
-  }
+      },
+    ],
+  },
+  plugins: [
+    new Webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('test'),
+    }),
+  ],
 })

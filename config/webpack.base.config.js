@@ -1,14 +1,14 @@
-const {join} = require('path')
+const path = require('path')
 const formatter = require('eslint-friendly-formatter')
 
 const resolve = function(dir) {
-  return join(__dirname, '..', dir)
+  return path.join(__dirname, '..', dir)
 }
 // noinspection JSUnusedGlobalSymbols
 module.exports = {
   target: 'node',
   entry: {
-    app: ['./src/index.ts']
+    app: ['./src/index.ts'],
   },
   output: {
     path: resolve('dist'),
@@ -21,7 +21,7 @@ module.exports = {
       '@': resolve('src'),
       '~': resolve('lib'),
       '@@': resolve('./'),
-      '~~': resolve('./')
+      '~~': resolve('./'),
     },
   },
   module: {
@@ -42,8 +42,8 @@ module.exports = {
           {
             loader: 'ts-loader',
             options: {
-              appendTsSuffixTo: [/\.vue$/]
-            }
+              appendTsSuffixTo: [/\.vue$/],
+            },
           },
         ],
       },
@@ -52,6 +52,6 @@ module.exports = {
         exclude: /node_modules/,
         use: 'babel-loader',
       },
-    ]
+    ],
   },
 }

@@ -1,33 +1,69 @@
-interface IOptions extends IRunningOptions{
+type TResolveOptionItem = string | boolean | ((name: string) => string)
+const defaultSuccessDecoration = 'Success'
+const defaultFailureDecoration = 'Failure'
 
-}
-interface IRunningOptions {
-  success?: string
-  failure?: string
-  promise?: boolean
+export interface IResolveOptions {
+  success?: TResolveOptionItem
+  failure?: TResolveOptionItem
 }
 
-const kegResolve = (options: IOptions = {}) => () => {
-  const {success = 'Success', failure = 'Failure'} = options
+const generateItem = (
+  item: TResolveOptionItem,
+  defaultItem: string,
+): TResolveOptionItem => {
+  if(item === true){return defaultItem}
+  if(typeof item === 'undefined' || item === false){return}
+  if(typeof item === 'function'){
+    return item
+  }
+}
+
+const generateOptions = (
+  options: IResolveOptions | boolean,
+): IResolveOptions => {
+  if(options === true){return {
+    success: defaultSuccessDecoration,
+    failure: defaultFailureDecoration,
+  }}
+  if(typeof options === 'object'){
+    const success = generateItem(options.success, defaultSuccessDecoration)
+    const failure = generateItem(options.failure, defaultFailureDecoration)
+    return {success, failure}
+  }
+  return {}
+}
+
+const generateName = (operator: TResolveOptionItem, name: string) => {
+  if(typeof operator === 'string'){
+    return `${name}${operator}`
+  }
+  if(typeof operator === 'function'){
+    return operator(name)
+  }
+}
+
+const kegResolve = (options: IResolveOptions | boolean) => () => {
+  const generatedOptions: IResolveOptions = generateOptions(options)
   return (context: any) => {
-    return (resolve: Promise<any>, runOptions: IRunningOptions = {}): Promise<any> => {
-      const run = (outResolve?: any, outReject?: any) => {
+    return (resolve: Promise<any>, runOptions: boolean | IResolveOptions): Promise<any> => {
+      if(!options && !runOptions){return}
+      const {
+        success,
+        failure,
+      } = {...generatedOptions, ...generateOptions(runOptions)}
+      return new Promise((outResolve?: any, outReject?: any) => {
         resolve.then((result) => {
-          context.commit(`${context.name}${success}`, result)
-          if(outResolve){
-            outResolve(result)
+          if(success){
+            context.commit(generateName(success, context.name), result)
           }
+          outResolve(result)
         }).catch((error) => {
-          context.commit(`${context.name}${failure}`, error)
-          if(outReject){
-            outReject(error)
+          if(failure){
+            context.commit(generateName(failure, context.name), error)
           }
+          outReject(error)
         })
-      }
-      if(runOptions.promise || options.promise){
-        return new Promise(run)
-      }
-      run()
+      })
     }
   }
 }
