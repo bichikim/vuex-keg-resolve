@@ -28,7 +28,6 @@ const kegResolve = (options: IOptions = {}) => () => {
         return new Promise(run)
       }
       run()
-
     }
   }
 }
