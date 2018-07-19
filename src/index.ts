@@ -7,7 +7,7 @@ export interface IResolveOptions {
   failure?: TResolveOptionItem
 }
 
-const generateItem = (
+const generateOptionItem = (
   item: TResolveOptionItem,
   defaultItem: string,
 ): TResolveOptionItem => {
@@ -26,8 +26,8 @@ const generateOptions = (
     failure: defaultFailureDecoration,
   }}
   if(typeof options === 'object'){
-    const success = generateItem(options.success, defaultSuccessDecoration)
-    const failure = generateItem(options.failure, defaultFailureDecoration)
+    const success = generateOptionItem(options.success, defaultSuccessDecoration)
+    const failure = generateOptionItem(options.failure, defaultFailureDecoration)
     return {success, failure}
   }
   return {}
