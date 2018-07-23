@@ -1,2 +1,3 @@
-import MyTypescript from './src'
-export {MyTypescript}
+export * from './src'
+import vuexResolve from './src'
+export default vuexResolve
