@@ -11,26 +11,27 @@ const generateOptionItem = (
   item: TResolveOptionItem,
   defaultItem: string,
 ): TResolveOptionItem => {
-  if(item === true){return defaultItem}
-  if(typeof item === 'undefined' || item === false){return}
+  if(item === true || typeof item === 'undefined' ){return (name) => (`${name}${defaultItem}`)}
+  if(typeof item === 'string'){return () => (item)}
+  if(item === false){return}
   if(typeof item === 'function'){
     return item
   }
 }
 
 const generateOptions = (
-  options: IResolveOptions | boolean,
+  options: IResolveOptions,
+  runOptions: IResolveOptions,
+  paramOptions: IResolveOptions,
 ): IResolveOptions => {
-  if(options === true){return {
-    success: defaultSuccessDecoration,
-    failure: defaultFailureDecoration,
-  }}
-  if(typeof options === 'object'){
-    const success = generateOptionItem(options.success, defaultSuccessDecoration)
-    const failure = generateOptionItem(options.failure, defaultFailureDecoration)
-    return {success, failure}
+  const {
+    success = runOptions.success || options.success,
+    failure = runOptions.success || options.success,
+  } = paramOptions
+  return {
+    success: generateOptionItem(success, defaultSuccessDecoration),
+    failure: generateOptionItem(failure, defaultFailureDecoration),
   }
-  return {}
 }
 
 const generateName = (operator: TResolveOptionItem, name: string) => {
@@ -42,15 +43,21 @@ const generateName = (operator: TResolveOptionItem, name: string) => {
   }
 }
 
-const kegResolve = (options: IResolveOptions | boolean) => () => {
-  const generatedOptions: IResolveOptions = generateOptions(options)
-  return (context: any) => {
-    return (resolve: Promise<any>, runOptions: boolean | IResolveOptions): Promise<any> => {
+const kegResolve = (options: IResolveOptions = {}) => () => {
+  return (context: any, payload: any, runOptions: IResolveOptions = {}) => {
+    return (
+      resolve: Promise<any>,
+      _success: string | IResolveOptions | TResolveOptionItem,
+      _failure: string | TResolveOptionItem): Promise<any> => {
       if(!options && !runOptions){return}
+      const paramOptions: IResolveOptions = typeof _success === 'object' ? _success : {
+        success: _success,
+        failure: _failure,
+      }
       const {
         success,
         failure,
-      } = {...generatedOptions, ...generateOptions(runOptions)}
+      } = generateOptions(options, runOptions, paramOptions)
       return new Promise((outResolve?: any, outReject?: any) => {
         resolve.then((result) => {
           if(success){
