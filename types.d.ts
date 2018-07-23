@@ -1,3 +1,3 @@
 export * from './src'
-import vuexResolve from './src'
-export default vuexResolve
+import kegResolve from './src'
+export default kegResolve
