@@ -37,6 +37,13 @@ describe('vuex-keg-resolve', () => {
             }
           )
         },
+        testChangeArray({resolve}) {
+          return resolve(
+            Promise.resolve('testChangeArraySuccess'),
+            ['testSuccess', 'testChangeSuccess1'],
+            ['testChangeErrorFailure1', 'testChangeErrorFailure1']
+          )
+        },
       }),
     },
     mutations:{
@@ -87,5 +94,9 @@ describe('vuex-keg-resolve', () => {
   it('should resolve testChangeWithObject', async () => {
     await store.dispatch('testChangeWithObject')
     expect(store.state.test).to.equal('testChangeWithObject')
+  })
+  it('should resolve testChangeArray', async () => {
+    await store.dispatch('testChangeArray')
+    expect(store.state.test).to.equal('testChangeArraySuccess')
   })
 })

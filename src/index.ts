@@ -3,8 +3,8 @@ const defaultSuccessDecoration = 'Success'
 const defaultFailureDecoration = 'Failure'
 
 export interface IResolveOptions {
-  success?: TResolveOptionItem
-  failure?: TResolveOptionItem
+  success?: TResolveOptionItem | TResolveOptionItem[]
+  failure?: TResolveOptionItem | TResolveOptionItem[]
 }
 
 const generateOptionItem = (
@@ -19,7 +19,7 @@ const generateOptionItem = (
   }
 }
 
-const generateOptions = (
+const resolveOptions = (
   options: IResolveOptions,
   runOptions: IResolveOptions,
   paramOptions: IResolveOptions,
@@ -29,8 +29,8 @@ const generateOptions = (
     failure = runOptions.success || options.success,
   } = paramOptions
   return {
-    success: generateOptionItem(success, defaultSuccessDecoration),
-    failure: generateOptionItem(failure, defaultFailureDecoration),
+    success,
+    failure,
   }
 }
 
@@ -43,34 +43,60 @@ const generateName = (operator: TResolveOptionItem, name: string) => {
   }
 }
 
+
+export type TKegResolvePluginRunner = (
+  resolve: Promise<any> | any,
+  success: string | TResolveOptionItem,
+) => Promise<any>
+
 const kegResolve = (options: IResolveOptions = {}) => () => {
   return (context: any, payload: any, runOptions: IResolveOptions = {}) => {
-    return (
-      resolve: Promise<any>,
+    return async (
+      resolve: Promise<any> | any,
       _success: string | IResolveOptions | TResolveOptionItem,
       _failure: string | TResolveOptionItem): Promise<any> => {
       if(!options && !runOptions){return}
-      const paramOptions: IResolveOptions = typeof _success === 'object' ? _success : {
-        success: _success,
-        failure: _failure,
-      }
+      const paramOptions: IResolveOptions =
+        typeof _success === 'object' && !Array.isArray(_success) ? _success : {
+          success: _success,
+          failure: _failure,
+        }
       const {
         success,
         failure,
-      } = generateOptions(options, runOptions, paramOptions)
-      return new Promise((outResolve?: any, outReject?: any) => {
-        resolve.then((result) => {
-          if(success){
-            context.commit(generateName(success, context.name), result)
-          }
-          outResolve(result)
-        }).catch((error) => {
-          if(failure){
-            context.commit(generateName(failure, context.name), error)
-          }
-          outReject(error)
-        })
-      })
+      } = resolveOptions(options, runOptions, paramOptions)
+      const commit = (
+        success: TResolveOptionItem,
+        defaultDecoration: string,
+        value: any
+      ) => {
+        context.commit(generateName(
+          generateOptionItem(success, defaultDecoration),
+          context.name
+        ), value)
+      }
+
+      let result: any
+      try{
+        result = await resolve
+        if(Array.isArray(success)){
+          success.forEach((oneOfSuccess) => {
+            commit(oneOfSuccess, defaultSuccessDecoration, result)
+          })
+        }else{
+          commit(success, defaultSuccessDecoration, result)
+        }
+        return result
+      }catch(error){
+        if(Array.isArray(failure)){
+          failure.forEach((oneOfFailure) => {
+            commit(oneOfFailure, defaultFailureDecoration, error)
+          })
+        }else{
+          commit(failure, defaultFailureDecoration, error)
+        }
+        throw error
+      }
     }
   }
 }
