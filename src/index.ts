@@ -47,10 +47,12 @@ const generateName = (operator: TResolveOptionItem, name: string) => {
 export type TKegResolvePluginRunner = (
   resolve: Promise<any> | any,
   success: string | TResolveOptionItem,
+  failure: string | TResolveOptionItem,
 ) => Promise<any>
 
 const kegResolve = (options: IResolveOptions = {}) => () => {
-  return (context: any, payload: any, runOptions: IResolveOptions = {}) => {
+  return (context: any, payload: any, runOptions: IResolveOptions = {}):
+  TKegResolvePluginRunner => {
     return async (
       resolve: Promise<any> | any,
       _success: string | IResolveOptions | TResolveOptionItem,
