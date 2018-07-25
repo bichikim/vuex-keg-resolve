@@ -1,6 +1,6 @@
 {
   "name": "vuex-keg-resolve",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A quick way to start typescriptp",
   "author": "bichi",
   "main": "dist/app.js",
@@ -72,9 +72,9 @@
     "webpack-node-externals": "^1.7.2"
   },
   "dependencies": {
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.5",
     "vue": "^2.5.16",
     "vuex": "^3.0.1",
-    "vuex-keg": "^1.1.0"
+    "vuex-keg": "^1.3.2"
   }
 }
