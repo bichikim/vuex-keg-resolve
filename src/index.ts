@@ -46,8 +46,8 @@ const generateName = (operator: TResolveOptionItem, name: string) => {
 
 export type TKegResolvePluginRunner = (
   resolve: Promise<any> | any,
-  success: string | TResolveOptionItem,
-  failure?: string | TResolveOptionItem,
+  success: string | TResolveOptionItem | TResolveOptionItem[],
+  failure?: string | TResolveOptionItem | TResolveOptionItem[],
 ) => Promise<any>
 
 const kegResolve = (options: IResolveOptions = {}) => () => {
@@ -55,8 +55,8 @@ const kegResolve = (options: IResolveOptions = {}) => () => {
   TKegResolvePluginRunner => {
     return async (
       resolve: Promise<any> | any,
-      _success: string | IResolveOptions | TResolveOptionItem,
-      _failure?: string | TResolveOptionItem): Promise<any> => {
+      _success: string | IResolveOptions | TResolveOptionItem | TResolveOptionItem[],
+      _failure?: string | TResolveOptionItem | TResolveOptionItem[]): Promise<any> => {
       if(!options && !runOptions){return}
       const paramOptions: IResolveOptions =
         typeof _success === 'object' && !Array.isArray(_success) ? _success : {
